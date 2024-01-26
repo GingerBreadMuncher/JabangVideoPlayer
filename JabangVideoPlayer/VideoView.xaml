@@ -1,0 +1,98 @@
+﻿<Window x:Class="JabangVideoPlayer.VideoView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:JabangVideoPlayer"
+        mc:Ignorable="d"
+        Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
+        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip">
+    <Border Background="#101020">
+        <Grid x:Name="grid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Background="#050510" Grid.ColumnSpan="3"/>
+
+            <Label Grid.Row="0"
+                   Content="JVP"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Foreground="LightGray"
+                   Padding="15,2,0,0"
+                   Grid.ColumnSpan="5"
+                   MouseDown="DragBorder_MouseDown"/>
+
+            <StackPanel HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Grid.ColumnSpan="3">
+
+                <Button x:Name="MinimizeApp"
+                    Background="Transparent"
+                    Foreground="LightGray"
+                    BorderThickness="0"
+                    Width="25"
+                    Content="🗕"
+                    FontSize="15"
+                    Padding="0,-5,0,5"
+                    Click="MinimizeApp_Click"/>
+
+                <Button x:Name="MaximizeApp"
+                    Background="Transparent"
+                    Foreground="LightGray"
+                    BorderThickness="0"
+                    Width="25"
+                    Content="🗖"
+                    FontSize="15"
+                    Padding="0,0,0,3"
+                    Click="MaximizeApp_Click"/>
+
+                <Button x:Name="CloseApp"
+                    Background="Transparent"
+                    Foreground="LightGray"
+                    BorderThickness="0"
+                    Width="25"
+                    Content="✕"
+                    FontSize="15"
+                    Click="CloseApp_Click"/>
+
+            </StackPanel>
+
+            <TextBlock x:Name="Status" Grid.Row="1" Grid.ColumnSpan="3"
+                Text="No video has been selected" Foreground="White"
+                FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Margin="0,0,0,150" Visibility="Visible"/>
+
+            <Button x:Name="Select" Grid.Row="1" Width="200" Height="50" Background="Black" HorizontalAlignment="Center" Grid.ColumnSpan="3"
+                    Foreground="White" Content="Select a video" FontSize="25" Visibility="Visible" Click="Select_Click" Margin="0,0,0,0"/>
+
+            <MediaElement x:Name="VPlayer" Grid.Row="1" Grid.ColumnSpan="3"
+                          LoadedBehavior="Manual"
+                          UnloadedBehavior="Manual"
+                          MediaEnded="VPlayer_MediaEnded" Stretch="Uniform"/>
+
+            <Button x:Name="Play" Grid.Row="2" Width="50" FontSize="25"
+                    HorizontalAlignment="Left" Content="⏸" 
+                    Background="Black" Foreground="White"
+                    Click="Play_Click"/>
+
+            <Slider x:Name="Volume" Grid.Row="2" Grid.Column="2" Width="100"
+                    HorizontalAlignment="Right" VerticalAlignment="Center" ValueChanged="Volume_ValueChanged"
+                    Minimum="1" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
+            
+            <Slider x:Name="Timeline" Grid.Row="2" Grid.Column="1"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
+                    Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
+
+        </Grid>
+    </Border>
+</Window>
