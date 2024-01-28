@@ -1,19 +1,6 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace JabangVideoPlayer
 {
@@ -22,20 +9,19 @@ namespace JabangVideoPlayer
     /// </summary>
     public partial class VideoView : Window
     {
-        MainWindow mainWindow = new MainWindow();
-        private string _filePath;
-        bool videosPlaying = true;
+        private Video _video;
+        private VideoPlayer _videoPlayer;
+        private VideoPlayerControls _videoPlayerControls;
         bool videoEnded = false;
 
         public VideoView(string filePath)
         {
             InitializeComponent();
-            _filePath = filePath;
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.01);
-            timer.Tick += Timer_Tick;
-            PlayVideo();
-            timer.Start();
+            _videoPlayer = new VideoPlayer(VPlayer);
+            _video = new Video { FilePath = filePath};
+            _videoPlayer.LoadVideo(_video);
+            _videoPlayerControls = new VideoPlayerControls(_videoPlayer.Player, _videoPlayer);
+            _videoPlayer.PositionChanged += UpdateTimeline;
         }
 
         private void DragBorder_MouseDown(object sender, MouseButtonEventArgs e)
@@ -63,79 +49,57 @@ namespace JabangVideoPlayer
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }
 
-
-        public void PlayVideo()
-        {
-            if (_filePath != null)
-            {
-                videosPlaying = true;
-                Play.Content = "⏸";
-                VPlayer.Source = new Uri(_filePath);
-                VPlayer.Play();
-            }
-        }
-
         private void VPlayer_MediaEnded(object sender, RoutedEventArgs e)
         {
-            VPlayer.Position = TimeSpan.FromSeconds(0);
-            VPlayer.Pause();
-            VPlayer.Visibility = Visibility.Collapsed;
+            _videoPlayer.ResetPlayer();
+            _videoPlayer.Player.Visibility = Visibility.Collapsed;
             Status.Visibility = Visibility.Visible;
             Select.Visibility = Visibility.Visible;
             videoEnded = true;
-            videosPlaying = false;
+            _videoPlayerControls.videosPlaying = false;
             Play.Content = "▶";
             Application.Current.MainWindow.Height = 600;
             Application.Current.MainWindow.Width = 800;
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void UpdateTimeline(double value, double maxValue)
         {
-            if (VPlayer.NaturalDuration.HasTimeSpan)
-            {
-                Timeline.Maximum = VPlayer.NaturalDuration.TimeSpan.TotalSeconds;
-                Timeline.Value = VPlayer.Position.TotalSeconds;
-            }
+            Timeline.Value = value;
+            Timeline.Maximum = maxValue;
         }
 
         private void Play_Click(object sender, RoutedEventArgs e)
         {
-            if (videosPlaying)
-            {
-                VPlayer.Pause();
-                Play.Content = "▶";
-                videosPlaying = false;
-            }
-            else
-            {
-                VPlayer.Play();
-                Play.Content = "⏸";
-                videosPlaying = true;
-            }
+            Play.Content = _videoPlayerControls.PlayOrPause(Play.Content.ToString());
 
             if (videoEnded) 
             {
-                VideoEnded();
+                PreLoadVideo();
             }
         }
 
-        private void VideoEnded()
+        private void PreLoadVideo()
         {
             videoEnded = false;
-            VPlayer.Visibility = Visibility.Visible;
+            Play.Content = "⏸";
+            _videoPlayer.Player.Visibility = Visibility.Visible;
             Status.Visibility = Visibility.Collapsed;
             Select.Visibility = Visibility.Collapsed;
-            PlayVideo();
+            _videoPlayer.LoadVideo(_video);
+            _videoPlayerControls.videosPlaying = true;
         }
 
         private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            VPlayer.Position = TimeSpan.FromSeconds(Timeline.Value);
+            _videoPlayerControls.UpdatePosition(e.NewValue);
         }
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            VPlayer.Volume = Volume.Value / 100;
+            if (_videoPlayerControls != null)
+            {
+                _videoPlayerControls.Volume_ValueChanged(e.NewValue);
+            }
         }
 
         private void Select_Click(object sender, RoutedEventArgs e)
@@ -143,9 +107,8 @@ namespace JabangVideoPlayer
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
-                _filePath = openFileDialog.FileName;
-                VideoEnded();
-                PlayVideo();
+                _video.FilePath = openFileDialog.FileName;
+                PreLoadVideo();
             }
         }
     }
