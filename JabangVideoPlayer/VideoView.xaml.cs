@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace JabangVideoPlayer
 {
@@ -9,18 +10,19 @@ namespace JabangVideoPlayer
     /// </summary>
     public partial class VideoView : Window
     {
-        private Video _video;
-        private VideoPlayer _videoPlayer;
-        private VideoPlayerControls _videoPlayerControls;
-        bool videoEnded = false;
+        Video _video;
+        VideoPlayer _videoPlayer;
+        Controller _controller;
+        bool _isVideoEnded = false;
 
         public VideoView(string filePath)
         {
             InitializeComponent();
-            _videoPlayer = new VideoPlayer(VPlayer);
+            _videoPlayer = new VideoPlayer(vPlayer);
             _video = new Video { FilePath = filePath};
+            _controller = new Controller(_videoPlayer.Player, _videoPlayer);
+            PreLoadVideo();
             _videoPlayer.LoadVideo(_video);
-            _videoPlayerControls = new VideoPlayerControls(_videoPlayer.Player, _videoPlayer);
             _videoPlayer.PositionChanged += UpdateTimeline;
         }
 
@@ -53,26 +55,26 @@ namespace JabangVideoPlayer
         {
             _videoPlayer.ResetPlayer();
             _videoPlayer.Player.Visibility = Visibility.Collapsed;
-            Status.Visibility = Visibility.Visible;
-            Select.Visibility = Visibility.Visible;
-            videoEnded = true;
-            _videoPlayerControls.videosPlaying = false;
-            Play.Content = "▶";
+            status.Visibility = Visibility.Visible;
+            select.Visibility = Visibility.Visible;
+            _isVideoEnded = true;
+            _videoPlayer.VideosPlaying = false;
+            play.Content = "▶";
             Application.Current.MainWindow.Height = 600;
             Application.Current.MainWindow.Width = 800;
         }
 
         private void UpdateTimeline(double value, double maxValue)
         {
-            Timeline.Value = value;
-            Timeline.Maximum = maxValue;
+            timeline.Value = value;
+            timeline.Maximum = maxValue;
         }
 
         private void Play_Click(object sender, RoutedEventArgs e)
         {
-            Play.Content = _videoPlayerControls.PlayOrPause(Play.Content.ToString());
+            play.Content = _controller.PlayOrPause(play.Content.ToString());
 
-            if (videoEnded) 
+            if (_isVideoEnded) 
             {
                 PreLoadVideo();
             }
@@ -80,29 +82,29 @@ namespace JabangVideoPlayer
 
         private void PreLoadVideo()
         {
-            videoEnded = false;
-            Play.Content = "⏸";
+            _isVideoEnded = false;
+            play.Content = "⏸";
             _videoPlayer.Player.Visibility = Visibility.Visible;
-            Status.Visibility = Visibility.Collapsed;
-            Select.Visibility = Visibility.Collapsed;
+            status.Visibility = Visibility.Collapsed;
+            select.Visibility = Visibility.Collapsed;
             _videoPlayer.LoadVideo(_video);
-            _videoPlayerControls.videosPlaying = true;
+            _videoPlayer.VideosPlaying = true;
         }
 
         private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            _videoPlayerControls.UpdatePosition(e.NewValue);
+            _controller.UpdatePosition(e.NewValue);
         }
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_videoPlayerControls != null)
+            if (_controller != null)
             {
-                _videoPlayerControls.Volume_ValueChanged(e.NewValue);
+                _controller.Volume_ValueChanged(e.NewValue);
             }
         }
 
-        private void Select_Click(object sender, RoutedEventArgs e)
+        private void OpenFile(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)

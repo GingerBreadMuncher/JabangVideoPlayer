@@ -15,6 +15,8 @@ namespace JabangVideoPlayer
         public double MaxValue { get; private set; }
         public double Value { get; private set; }
 
+        public bool VideosPlaying = true;
+
         public VideoPlayer(MediaElement player) 
         {
             CurrentVideo = new Video();

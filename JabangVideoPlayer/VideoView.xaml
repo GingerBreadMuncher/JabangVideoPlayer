@@ -7,10 +7,11 @@
         mc:Ignorable="d"
         Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
         AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip">
-    <Border Background="#101020">
+    <Border Background="Black">
         <Grid x:Name="grid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition/>
                 <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
@@ -22,6 +23,10 @@
             </Grid.ColumnDefinitions>
 
             <Border Background="#050510" Grid.ColumnSpan="3"/>
+
+            <Border Grid.Row="1" Background="#101020" Grid.ColumnSpan="3"/>
+            
+            <Border Grid.Row="3" Background="#101020" Grid.ColumnSpan="3"/>
 
             <Label Grid.Row="0"
                    Content="JVP"
@@ -67,29 +72,36 @@
 
             </StackPanel>
 
-            <TextBlock x:Name="Status" Grid.Row="1" Grid.ColumnSpan="3"
-                Text="No video has been selected" Foreground="White"
-                FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <Menu Grid.Row="1" Background="Transparent">
+                <MenuItem Header="File" Foreground="White" FontSize="15" HorizontalAlignment="Center" BorderThickness="0">
+                    <MenuItem Header="Open" x:Name="openFile" Background="#101010" BorderThickness="0" Click="OpenFile"/>
+                    <MenuItem Header="Stop" x:Name="stopFile" Background="#101010" BorderThickness="0" Click="VPlayer_MediaEnded"/>
+                </MenuItem>
+            </Menu>
+
+            <TextBlock x:Name="status" Grid.Row="2" Grid.ColumnSpan="3"
+                Text="No video is playing right now" Foreground="White"
+                FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"
                 Margin="0,0,0,150" Visibility="Visible"/>
 
-            <Button x:Name="Select" Grid.Row="1" Width="200" Height="50" Background="Black" HorizontalAlignment="Center" Grid.ColumnSpan="3"
-                    Foreground="White" Content="Select a video" FontSize="25" Visibility="Visible" Click="Select_Click" Margin="0,0,0,0"/>
+            <Button x:Name="select" Grid.Row="2" Width="200" Height="50" Background="Black" HorizontalAlignment="Center" Grid.ColumnSpan="3"
+                    Foreground="White" Content="Select a video" FontSize="25" Visibility="Visible" Click="OpenFile" Margin="0,0,0,0"/>
 
-            <MediaElement x:Name="VPlayer" Grid.Row="1" Grid.ColumnSpan="3"
+            <MediaElement x:Name="vPlayer" Grid.Row="2" Grid.ColumnSpan="3"
                           LoadedBehavior="Manual"
                           UnloadedBehavior="Manual"
                           MediaEnded="VPlayer_MediaEnded" Stretch="Uniform"/>
 
-            <Button x:Name="Play" Grid.Row="2" Width="50" FontSize="25"
+            <Button x:Name="play" Grid.Row="3" Width="50" FontSize="25"
                     HorizontalAlignment="Left" Content="⏸" 
                     Background="Black" Foreground="White"
                     Click="Play_Click"/>
 
-            <Slider x:Name="Volume" Grid.Row="2" Grid.Column="2" Width="100"
+            <Slider x:Name="volume" Grid.Row="3" Grid.Column="2" Width="100"
                     HorizontalAlignment="Right" VerticalAlignment="Center" ValueChanged="Volume_ValueChanged"
                     Minimum="1" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
             
-            <Slider x:Name="Timeline" Grid.Row="2" Grid.Column="1"
+            <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
                     Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
 
