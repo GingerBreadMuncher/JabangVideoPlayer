@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -14,16 +15,17 @@ namespace JabangVideoPlayer
         VideoPlayer _videoPlayer;
         Controller _controller;
         bool _isVideoEnded = false;
+        bool _isTitlePopUpEnabled = true;
 
-        public VideoView(string filePath)
+        public VideoView(string filePath, string fileName)
         {
             InitializeComponent();
             _videoPlayer = new VideoPlayer(vPlayer);
-            _video = new Video { FilePath = filePath};
+            _video = new Video { FilePath = filePath, FileName = fileName};
             _controller = new Controller(_videoPlayer.Player, _videoPlayer);
             PreLoadVideo();
-            _videoPlayer.LoadVideo(_video);
             _videoPlayer.PositionChanged += UpdateTimeline;
+            TitlePopUp(_video.FileName);
         }
 
         private void DragBorder_MouseDown(object sender, MouseButtonEventArgs e)
@@ -110,7 +112,38 @@ namespace JabangVideoPlayer
             if (openFileDialog.ShowDialog() == true)
             {
                 _video.FilePath = openFileDialog.FileName;
+                _video.FileName = openFileDialog.SafeFileName;
                 PreLoadVideo();
+                TitlePopUp(_video.FileName);
+            }
+        }
+
+        private void TitlePopUp(string fileName)
+        {
+            if (_isTitlePopUpEnabled) 
+            {
+                videoTitle.Text = fileName;
+                Task.Delay(3000).ContinueWith(_ =>
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        videoTitle.Text = "";
+                    });
+                });
+            }
+        }
+
+        private void TitlePopUp_Switch(object sender, RoutedEventArgs e)
+        {
+            if (_isTitlePopUpEnabled)
+            {
+                titlePopUp.Header = "Enable title pop-up";
+                _isTitlePopUpEnabled = false;
+            }
+            else
+            {
+                titlePopUp.Header = "Disable title pop-up";
+                _isTitlePopUpEnabled = true;
             }
         }
     }

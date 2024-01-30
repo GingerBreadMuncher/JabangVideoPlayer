@@ -77,6 +77,9 @@
                     <MenuItem Header="Open" x:Name="openFile" Background="#101010" BorderThickness="0" Click="OpenFile"/>
                     <MenuItem Header="Stop" x:Name="stopFile" Background="#101010" BorderThickness="0" Click="VPlayer_MediaEnded"/>
                 </MenuItem>
+                <MenuItem Header="Options" Foreground="White" FontSize="15" HorizontalAlignment="Center" BorderThickness="0">
+                    <MenuItem Header="Disable title pop-up" x:Name="titlePopUp" Background="#101010" BorderThickness="0" Click="TitlePopUp_Switch"/>
+                </MenuItem>
             </Menu>
 
             <TextBlock x:Name="status" Grid.Row="2" Grid.ColumnSpan="3"
@@ -104,6 +107,17 @@
             <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
                     Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
+
+            <TextBlock x:Name="videoTitle" Grid.Row="2" Grid.ColumnSpan="3"
+                       Text="Hello" Foreground="White" HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom" FontSize="48" Margin="0,0,0,30">
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="4"
+                                      Color="Black"
+                                      Opacity="1"
+                                      BlurRadius="4"/>
+                </TextBlock.Effect>
+            </TextBlock>
 
         </Grid>
     </Border>

@@ -58,13 +58,13 @@ namespace JabangVideoPlayer
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
-                OpenVideoView(openFileDialog.FileName);
+                OpenVideoView(openFileDialog.FileName, openFileDialog.SafeFileName);
             }
         }
 
-        private void OpenVideoView(string filePath)
+        private void OpenVideoView(string filePath, string fileName)
         {
-            VideoView videoViewWindow = new VideoView(filePath);
+            VideoView videoViewWindow = new VideoView(filePath, fileName);
             videoViewWindow.Show();
             this.Close();
         }
