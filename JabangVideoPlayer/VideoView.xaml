@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:JabangVideoPlayer"
         mc:Ignorable="d"
         Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
-        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip">
+        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown">
     <Border Background="Black">
         <Grid x:Name="grid">
             <Grid.RowDefinitions>
@@ -17,9 +17,9 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="75"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="175"/>
             </Grid.ColumnDefinitions>
 
             <Border Background="#050510" Grid.ColumnSpan="3"/>
@@ -41,7 +41,7 @@
                     Orientation="Horizontal"
                     Grid.ColumnSpan="3">
 
-                <Button x:Name="MinimizeApp"
+                <Button x:Name="minimizeApp"
                     Background="Transparent"
                     Foreground="LightGray"
                     BorderThickness="0"
@@ -51,7 +51,7 @@
                     Padding="0,-5,0,5"
                     Click="MinimizeApp_Click"/>
 
-                <Button x:Name="MaximizeApp"
+                <Button x:Name="maximizeApp"
                     Background="Transparent"
                     Foreground="LightGray"
                     BorderThickness="0"
@@ -61,7 +61,7 @@
                     Padding="0,0,0,3"
                     Click="MaximizeApp_Click"/>
 
-                <Button x:Name="CloseApp"
+                <Button x:Name="closeApp"
                     Background="Transparent"
                     Foreground="LightGray"
                     BorderThickness="0"
@@ -72,13 +72,14 @@
 
             </StackPanel>
 
-            <Menu Grid.Row="1" Background="Transparent">
+            <Menu Grid.Row="1" Grid.ColumnSpan="3" Background="Transparent">
                 <MenuItem Header="File" Foreground="White" FontSize="15" HorizontalAlignment="Center" BorderThickness="0">
                     <MenuItem Header="Open" x:Name="openFile" Background="#101010" BorderThickness="0" Click="OpenFile"/>
                     <MenuItem Header="Stop" x:Name="stopFile" Background="#101010" BorderThickness="0" Click="VPlayer_MediaEnded"/>
                 </MenuItem>
                 <MenuItem Header="Options" Foreground="White" FontSize="15" HorizontalAlignment="Center" BorderThickness="0">
                     <MenuItem Header="Disable title pop-up" x:Name="titlePopUp" Background="#101010" BorderThickness="0" Click="TitlePopUp_Switch"/>
+                    <MenuItem Header="Disable full screen pop-up" x:Name="fullScreenPopUp" Background="#101010" BorderThickness="0" Click="FullScreenPopUp_Switch"/>
                 </MenuItem>
             </Menu>
 
@@ -96,20 +97,25 @@
                           MediaEnded="VPlayer_MediaEnded" Stretch="Uniform"/>
 
             <Button x:Name="play" Grid.Row="3" Width="50" FontSize="25"
-                    HorizontalAlignment="Left" Content="⏸" 
+                    HorizontalAlignment="Left" Content="⏸"
                     Background="Black" Foreground="White"
                     Click="Play_Click"/>
 
             <Slider x:Name="volume" Grid.Row="3" Grid.Column="2" Width="100"
-                    HorizontalAlignment="Right" VerticalAlignment="Center" ValueChanged="Volume_ValueChanged"
-                    Minimum="1" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
+                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="25,0,0,0" ValueChanged="Volume_ValueChanged"
+                    Minimum="0" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
             
             <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
                     Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
 
-            <TextBlock x:Name="videoTitle" Grid.Row="2" Grid.ColumnSpan="3"
-                       Text="Hello" Foreground="White" HorizontalAlignment="Center"
+            <Button x:Name="fullScreen" Grid.Row="3" Grid.Column="2" Width="50" FontSize="35"
+                    HorizontalAlignment="Right" Content="⛶" BorderThickness="0"
+                    Background="Black" Foreground="White"
+                    Click="FullScreen_Click"/>
+
+            <TextBlock x:Name="titlePopUpText" Grid.Row="2" Grid.ColumnSpan="3"
+                       Text="" Foreground="White" HorizontalAlignment="Center"
                        VerticalAlignment="Bottom" FontSize="48" Margin="0,0,0,30">
                 <TextBlock.Effect>
                     <DropShadowEffect ShadowDepth="4"
@@ -117,6 +123,21 @@
                                       Opacity="1"
                                       BlurRadius="4"/>
                 </TextBlock.Effect>
+            </TextBlock>
+            
+            
+            <TextBlock x:Name="fullScreenPopUpText" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Collapsed"
+                       Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="Bold"
+                       VerticalAlignment="Top" FontSize="48" Margin="0,30,0,0">
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="4"
+                                      Color="Black"
+                                      Opacity="1"
+                                      BlurRadius="4"/>
+                </TextBlock.Effect>
+                You're now in full screen mode!
+                <LineBreak/>
+                Press F11 to Exit
             </TextBlock>
 
         </Grid>

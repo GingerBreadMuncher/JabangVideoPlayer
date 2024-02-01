@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace JabangVideoPlayer
 {
@@ -15,7 +14,9 @@ namespace JabangVideoPlayer
         VideoPlayer _videoPlayer;
         Controller _controller;
         bool _isVideoEnded = false;
+        bool _isFullScreen = false;
         bool _isTitlePopUpEnabled = true;
+        bool _isFullScreenPopUpEnabled = true;
 
         public VideoView(string filePath, string fileName)
         {
@@ -23,6 +24,7 @@ namespace JabangVideoPlayer
             _videoPlayer = new VideoPlayer(vPlayer);
             _video = new Video { FilePath = filePath, FileName = fileName};
             _controller = new Controller(_videoPlayer.Player, _videoPlayer);
+            this.KeyDown += new KeyEventHandler(Window_KeyDown);
             PreLoadVideo();
             _videoPlayer.PositionChanged += UpdateTimeline;
             TitlePopUp(_video.FileName);
@@ -42,15 +44,52 @@ namespace JabangVideoPlayer
 
         private void MaximizeApp_Click(object sender, RoutedEventArgs e)
         {
-            if (Application.Current.MainWindow.WindowState != WindowState.Maximized)
-                Application.Current.MainWindow.WindowState = WindowState.Maximized;
+            MaximizeApp();
+        }
+
+        private void MaximizeApp()
+        {
+            if (this.WindowState != WindowState.Maximized)
+            {
+                this.SizeToContent = SizeToContent.Manual;
+                this.WindowState = WindowState.Maximized;
+            }
             else
-                Application.Current.MainWindow.WindowState = WindowState.Normal;
+            {
+                this.SizeToContent = SizeToContent.Width;
+                this.WindowState = WindowState.Normal;
+            }
         }
 
         private void MinimizeApp_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void FullScreen_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState != WindowState.Maximized)
+            {
+                MaximizeApp();
+                _isFullScreen = true;
+                grid.RowDefinitions[0].Height = new GridLength(0);
+                grid.RowDefinitions[1].Height = new GridLength(0);
+                grid.RowDefinitions[3].Height = new GridLength(0);
+                FullScreenPopUp();
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (_isFullScreen == true && e.Key == Key.F11)
+            {
+                MaximizeApp();
+                _isFullScreen = false;
+                fullScreenPopUpText.Visibility = Visibility.Collapsed;
+                grid.RowDefinitions[0].Height = new GridLength(30);
+                grid.RowDefinitions[1].Height = new GridLength(20);
+                grid.RowDefinitions[3].Height = new GridLength(50);
+            }
         }
 
         private void VPlayer_MediaEnded(object sender, RoutedEventArgs e)
@@ -62,8 +101,8 @@ namespace JabangVideoPlayer
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
-            Application.Current.MainWindow.Height = 600;
-            Application.Current.MainWindow.Width = 800;
+            this.Height = 600;
+            this.Width = 800;
         }
 
         private void UpdateTimeline(double value, double maxValue)
@@ -122,17 +161,32 @@ namespace JabangVideoPlayer
         {
             if (_isTitlePopUpEnabled) 
             {
-                videoTitle.Text = fileName;
+                titlePopUpText.Text = fileName;
                 Task.Delay(3000).ContinueWith(_ =>
                 {
                     this.Dispatcher.Invoke(() =>
                     {
-                        videoTitle.Text = "";
+                        titlePopUpText.Text = "";
                     });
                 });
             }
         }
 
+        private void FullScreenPopUp()
+        {
+            if (_isFullScreenPopUpEnabled)
+            {
+                fullScreenPopUpText.Visibility = Visibility.Visible;
+                Task.Delay(4000).ContinueWith(_ =>
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        fullScreenPopUpText.Visibility = Visibility.Collapsed;
+                    });
+                });
+            }
+        }
+        
         private void TitlePopUp_Switch(object sender, RoutedEventArgs e)
         {
             if (_isTitlePopUpEnabled)
@@ -144,6 +198,20 @@ namespace JabangVideoPlayer
             {
                 titlePopUp.Header = "Disable title pop-up";
                 _isTitlePopUpEnabled = true;
+            }
+        }
+
+        private void FullScreenPopUp_Switch(object sender, RoutedEventArgs e)
+        {
+            if (_isFullScreenPopUpEnabled)
+            {
+                fullScreenPopUp.Header = "Enable full screen pop-up";
+                _isFullScreenPopUpEnabled = false;
+            }
+            else
+            {
+                fullScreenPopUp.Header = "Disable full screen pop-up";
+                _isFullScreenPopUpEnabled = true;
             }
         }
     }
