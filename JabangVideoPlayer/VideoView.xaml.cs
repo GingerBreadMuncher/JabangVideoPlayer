@@ -84,7 +84,7 @@ namespace JabangVideoPlayer
         {
             if (_isFullScreen == false)
             {
-                MaximizeApp();
+                if (this.WindowState != WindowState.Maximized) { MaximizeApp(); }
                 _isFullScreen = true;
                 grid.RowDefinitions[0].Height = new GridLength(0);
                 grid.RowDefinitions[1].Height = new GridLength(0);
@@ -95,10 +95,7 @@ namespace JabangVideoPlayer
                 _fullScreenPopUpTimer.Start();
                 if (_isFullScreenPopUpEnabled) { fullScreenPopUpText.Visibility = Visibility.Visible; }
             }
-            else
-            {
-                ExitFullScreen();
-            }
+            else { ExitFullScreen(); }
         }
 
         private void ExitFullScreen()
