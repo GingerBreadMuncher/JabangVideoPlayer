@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace JabangVideoPlayer
 {
@@ -13,6 +15,8 @@ namespace JabangVideoPlayer
         Video _video;
         VideoPlayer _videoPlayer;
         Controller _controller;
+        DispatcherTimer _hideControlsTimer;
+        DispatcherTimer _fullScreenPopUpTimer;
         bool _isVideoEnded = false;
         bool _isFullScreen = false;
         bool _isTitlePopUpEnabled = true;
@@ -24,6 +28,15 @@ namespace JabangVideoPlayer
             _videoPlayer = new VideoPlayer(vPlayer);
             _video = new Video { FilePath = filePath, FileName = fileName};
             _controller = new Controller(_videoPlayer.Player, _videoPlayer);
+
+            _hideControlsTimer = new DispatcherTimer();
+            _hideControlsTimer.Interval = TimeSpan.FromSeconds(3);
+            _hideControlsTimer.Tick += HideControlsTimer_Tick;
+
+            _fullScreenPopUpTimer = new DispatcherTimer();
+            _fullScreenPopUpTimer.Interval = TimeSpan.FromSeconds(4);
+            _fullScreenPopUpTimer.Tick += FullScreenPopUpTimer_Tick;
+
             this.KeyDown += new KeyEventHandler(Window_KeyDown);
             PreLoadVideo();
             _videoPlayer.PositionChanged += UpdateTimeline;
@@ -37,6 +50,7 @@ namespace JabangVideoPlayer
                 DragMove();
             }
         }
+
         private void CloseApp_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
@@ -68,14 +82,60 @@ namespace JabangVideoPlayer
 
         private void FullScreen_Click(object sender, RoutedEventArgs e)
         {
-            if (this.WindowState != WindowState.Maximized)
+            if (_isFullScreen == false)
             {
                 MaximizeApp();
                 _isFullScreen = true;
                 grid.RowDefinitions[0].Height = new GridLength(0);
                 grid.RowDefinitions[1].Height = new GridLength(0);
-                grid.RowDefinitions[3].Height = new GridLength(0);
-                FullScreenPopUp();
+                vPlayer.MouseMove += vPlayer_MouseMove;
+                _hideControlsTimer.Stop();
+                _hideControlsTimer.Start();
+                _fullScreenPopUpTimer.Stop();
+                _fullScreenPopUpTimer.Start();
+                if (_isFullScreenPopUpEnabled) { fullScreenPopUpText.Visibility = Visibility.Visible; }
+            }
+            else
+            {
+                ExitFullScreen();
+            }
+        }
+
+        private void ExitFullScreen()
+        {
+            MaximizeApp();
+            _isFullScreen = false;
+            fullScreenPopUpText.Visibility = Visibility.Collapsed;
+            grid.RowDefinitions[0].Height = new GridLength(30);
+            grid.RowDefinitions[1].Height = new GridLength(20);
+            _hideControlsTimer.Stop();
+            controlBar.Visibility = Visibility.Visible;
+        }
+
+        private void HideControlsTimer_Tick(object sender, EventArgs e)
+        {
+            if (_isFullScreen)
+            {
+                controlBar.Visibility = Visibility.Hidden;
+                _hideControlsTimer.Stop();
+            }
+        }
+
+        private void FullScreenPopUpTimer_Tick(object sender, EventArgs e)
+        {
+            if (_isFullScreenPopUpEnabled)
+            {
+                fullScreenPopUpText.Visibility = Visibility.Collapsed;
+                _hideControlsTimer.Stop();
+            }
+        }
+
+        private void vPlayer_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isFullScreen)
+            {
+                controlBar.Visibility = Visibility.Visible;
+                _hideControlsTimer.Start();
             }
         }
 
@@ -83,12 +143,7 @@ namespace JabangVideoPlayer
         {
             if (_isFullScreen == true && e.Key == Key.F11)
             {
-                MaximizeApp();
-                _isFullScreen = false;
-                fullScreenPopUpText.Visibility = Visibility.Collapsed;
-                grid.RowDefinitions[0].Height = new GridLength(30);
-                grid.RowDefinitions[1].Height = new GridLength(20);
-                grid.RowDefinitions[3].Height = new GridLength(50);
+                ExitFullScreen();
             }
         }
 
@@ -98,6 +153,7 @@ namespace JabangVideoPlayer
             _videoPlayer.Player.Visibility = Visibility.Collapsed;
             status.Visibility = Visibility.Visible;
             select.Visibility = Visibility.Visible;
+            controlBar.Visibility = Visibility.Visible;
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
@@ -167,21 +223,6 @@ namespace JabangVideoPlayer
                     this.Dispatcher.Invoke(() =>
                     {
                         titlePopUpText.Text = "";
-                    });
-                });
-            }
-        }
-
-        private void FullScreenPopUp()
-        {
-            if (_isFullScreenPopUpEnabled)
-            {
-                fullScreenPopUpText.Visibility = Visibility.Visible;
-                Task.Delay(4000).ContinueWith(_ =>
-                {
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        fullScreenPopUpText.Visibility = Visibility.Collapsed;
                     });
                 });
             }

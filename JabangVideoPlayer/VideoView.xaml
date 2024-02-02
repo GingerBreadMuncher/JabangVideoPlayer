@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
         AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown">
-    <Border Background="Black">
+    <Border Background="Black" MouseMove="vPlayer_MouseMove">
         <Grid x:Name="grid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -25,8 +25,6 @@
             <Border Background="#050510" Grid.ColumnSpan="3"/>
 
             <Border Grid.Row="1" Background="#101020" Grid.ColumnSpan="3"/>
-            
-            <Border Grid.Row="3" Background="#101020" Grid.ColumnSpan="3"/>
 
             <Label Grid.Row="0"
                    Content="JVP"
@@ -91,28 +89,40 @@
             <Button x:Name="select" Grid.Row="2" Width="200" Height="50" Background="Black" HorizontalAlignment="Center" Grid.ColumnSpan="3"
                     Foreground="White" Content="Select a video" FontSize="25" Visibility="Visible" Click="OpenFile" Margin="0,0,0,0"/>
 
-            <MediaElement x:Name="vPlayer" Grid.Row="2" Grid.ColumnSpan="3"
+            <MediaElement x:Name="vPlayer" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="2"
                           LoadedBehavior="Manual"
                           UnloadedBehavior="Manual"
                           MediaEnded="VPlayer_MediaEnded" Stretch="Uniform"/>
 
-            <Button x:Name="play" Grid.Row="3" Width="50" FontSize="25"
+            <Grid x:Name="controlBar" Grid.Row="3" Grid.ColumnSpan="3" Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="75"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="175"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Row="1" Background="#101020" Grid.ColumnSpan="3"/>
+
+                <Button x:Name="play" Grid.Row="3" Width="50" FontSize="25"
                     HorizontalAlignment="Left" Content="⏸"
                     Background="Black" Foreground="White"
                     Click="Play_Click"/>
 
-            <Slider x:Name="volume" Grid.Row="3" Grid.Column="2" Width="100"
+                <Slider x:Name="volume" Grid.Row="3" Grid.Column="2" Width="100"
                     HorizontalAlignment="Left" VerticalAlignment="Center" Margin="25,0,0,0" ValueChanged="Volume_ValueChanged"
                     Minimum="0" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
-            
-            <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
+
+                <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
                     Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
 
-            <Button x:Name="fullScreen" Grid.Row="3" Grid.Column="2" Width="50" FontSize="35"
+                <Button x:Name="fullScreen" Grid.Row="3" Grid.Column="2" Width="50" FontSize="35"
                     HorizontalAlignment="Right" Content="⛶" BorderThickness="0"
                     Background="Black" Foreground="White"
                     Click="FullScreen_Click"/>
+
+            </Grid>
+
 
             <TextBlock x:Name="titlePopUpText" Grid.Row="2" Grid.ColumnSpan="3"
                        Text="" Foreground="White" HorizontalAlignment="Center"
@@ -124,8 +134,8 @@
                                       BlurRadius="4"/>
                 </TextBlock.Effect>
             </TextBlock>
-            
-            
+
+
             <TextBlock x:Name="fullScreenPopUpText" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Collapsed"
                        Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="Bold"
                        VerticalAlignment="Top" FontSize="48" Margin="0,30,0,0">
