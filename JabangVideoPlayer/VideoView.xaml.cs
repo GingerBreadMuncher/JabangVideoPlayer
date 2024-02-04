@@ -37,7 +37,7 @@ namespace JabangVideoPlayer
             _fullScreenPopUpTimer.Interval = TimeSpan.FromSeconds(4);
             _fullScreenPopUpTimer.Tick += FullScreenPopUpTimer_Tick;
 
-            this.KeyDown += new KeyEventHandler(Window_KeyDown);
+            this.KeyUp += new KeyEventHandler(Window_KeyDown);
             PreLoadVideo();
             _videoPlayer.PositionChanged += UpdateTimeline;
             TitlePopUp(_video.FileName);
@@ -49,6 +49,11 @@ namespace JabangVideoPlayer
             {
                 DragMove();
             }
+        }
+
+        private void Border_GotFocus(object sender, RoutedEventArgs e)
+        {
+            HideControls();
         }
 
         private void CloseApp_Click(object sender, RoutedEventArgs e)
@@ -82,26 +87,28 @@ namespace JabangVideoPlayer
 
         private void FullScreen_Click(object sender, RoutedEventArgs e)
         {
-            if (_isFullScreen == false)
-            {
-                if (this.WindowState != WindowState.Maximized) { MaximizeApp(); }
-                _isFullScreen = true;
-                grid.RowDefinitions[0].Height = new GridLength(0);
-                grid.RowDefinitions[1].Height = new GridLength(0);
-                vPlayer.MouseMove += vPlayer_MouseMove;
-                _hideControlsTimer.Stop();
-                _hideControlsTimer.Start();
-                _fullScreenPopUpTimer.Stop();
-                _fullScreenPopUpTimer.Start();
-                if (_isFullScreenPopUpEnabled) { fullScreenPopUpText.Visibility = Visibility.Visible; }
-            }
+            if (_isFullScreen == false) { EnterFullScreen(); }
             else { ExitFullScreen(); }
+        }
+
+        private void EnterFullScreen()
+        {
+            _isFullScreen = true;
+            if (this.WindowState != WindowState.Maximized) { MaximizeApp(); }
+            grid.RowDefinitions[0].Height = new GridLength(0);
+            grid.RowDefinitions[1].Height = new GridLength(0);
+            vPlayer.MouseMove += vPlayer_MouseMove;
+            _hideControlsTimer.Stop();
+            _hideControlsTimer.Start();
+            _fullScreenPopUpTimer.Stop();
+            _fullScreenPopUpTimer.Start();
+            if (_isFullScreenPopUpEnabled) { fullScreenPopUpText.Visibility = Visibility.Visible; }
         }
 
         private void ExitFullScreen()
         {
-            MaximizeApp();
             _isFullScreen = false;
+            if (this.WindowState != WindowState.Normal) { MaximizeApp(); }
             fullScreenPopUpText.Visibility = Visibility.Collapsed;
             grid.RowDefinitions[0].Height = new GridLength(30);
             grid.RowDefinitions[1].Height = new GridLength(20);
@@ -110,6 +117,11 @@ namespace JabangVideoPlayer
         }
 
         private void HideControlsTimer_Tick(object sender, EventArgs e)
+        {
+            HideControls();
+        }
+
+        private void HideControls()
         {
             if (_isFullScreen)
             {
@@ -138,9 +150,10 @@ namespace JabangVideoPlayer
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (_isFullScreen == true && e.Key == Key.F11)
+            if (e.Key == Key.F11)
             {
-                ExitFullScreen();
+                if (_isFullScreen == false) { EnterFullScreen(); }
+                else { ExitFullScreen(); }
             }
         }
 
