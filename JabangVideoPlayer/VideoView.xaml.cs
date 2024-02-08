@@ -1,9 +1,14 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace JabangVideoPlayer
 {
@@ -21,13 +26,15 @@ namespace JabangVideoPlayer
         bool _isFullScreen = false;
         bool _isTitlePopUpEnabled = true;
         bool _isFullScreenPopUpEnabled = true;
+        Dictionary<string, string> _listFilePaths;
 
         public VideoView(string filePath, string fileName)
         {
             InitializeComponent();
             _videoPlayer = new VideoPlayer(vPlayer);
-            _video = new Video { FilePath = filePath, FileName = fileName};
+            _video = new Video { FilePath = filePath, FileName = fileName };
             _controller = new Controller(_videoPlayer.Player, _videoPlayer);
+            _listFilePaths = new Dictionary<string, string>();
 
             _hideControlsTimer = new DispatcherTimer();
             _hideControlsTimer.Interval = TimeSpan.FromSeconds(3);
@@ -37,7 +44,7 @@ namespace JabangVideoPlayer
             _fullScreenPopUpTimer.Interval = TimeSpan.FromSeconds(4);
             _fullScreenPopUpTimer.Tick += FullScreenPopUpTimer_Tick;
 
-            this.KeyUp += new KeyEventHandler(Window_KeyDown);
+            this.KeyDown += new KeyEventHandler(Window_KeyDown);
             PreLoadVideo();
             _videoPlayer.PositionChanged += UpdateTimeline;
             TitlePopUp(_video.FileName);
@@ -152,8 +159,7 @@ namespace JabangVideoPlayer
         {
             if (e.Key == Key.F11)
             {
-                if (_isFullScreen == false) { EnterFullScreen(); }
-                else { ExitFullScreen(); }
+                if (_isFullScreen == true) { ExitFullScreen(); }
             }
         }
 
@@ -167,8 +173,6 @@ namespace JabangVideoPlayer
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
-            this.Height = 600;
-            this.Width = 800;
         }
 
         private void UpdateTimeline(double value, double maxValue)
@@ -181,7 +185,7 @@ namespace JabangVideoPlayer
         {
             play.Content = _controller.PlayOrPause(play.Content.ToString());
 
-            if (_isVideoEnded) 
+            if (_isVideoEnded)
             {
                 PreLoadVideo();
             }
@@ -223,9 +227,53 @@ namespace JabangVideoPlayer
             }
         }
 
+        private void OpenFolder(object sender, RoutedEventArgs e)
+        {
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                folderListBox.Items.Clear();
+                grid.ColumnDefinitions[3].Width = new GridLength(250);
+                folderList.Visibility = Visibility.Visible;
+                string folderPath = dialog.FileName;
+                string[] extensions = new string[] { ".mp4", ".avi", ".mp3" };
+                IEnumerable<string> files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
+                    .Where(file => extensions.Contains(Path.GetExtension(file)));
+
+                foreach (string file in files)
+                {
+                    string fileName = Path.GetFileName(file);
+                    folderListBox.Items.Add(fileName);
+                    _listFilePaths[fileName] = file;
+                }
+            }
+        }
+
+        private void FolderListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selectedFileName = folderListBox.SelectedItem as string;
+
+            if (!string.IsNullOrEmpty(selectedFileName) && _listFilePaths.TryGetValue(selectedFileName, out string selectedFilePath))
+            {
+                _video.FilePath = selectedFilePath;
+                _video.FileName = selectedFileName;
+                PreLoadVideo();
+                TitlePopUp(_video.FileName);
+            }
+        }
+
+        private void CloseList_Click(object sender, RoutedEventArgs e)
+        {
+            folderListBox.Items.Clear();
+            folderList.Visibility = Visibility.Collapsed;
+            grid.ColumnDefinitions[3].Width = new GridLength(0);
+        }
+
         private void TitlePopUp(string fileName)
         {
-            if (_isTitlePopUpEnabled) 
+            if (_isTitlePopUpEnabled)
             {
                 titlePopUpText.Text = fileName;
                 Task.Delay(3000).ContinueWith(_ =>
@@ -237,7 +285,7 @@ namespace JabangVideoPlayer
                 });
             }
         }
-        
+
         private void TitlePopUp_Switch(object sender, RoutedEventArgs e)
         {
             if (_isTitlePopUpEnabled)
