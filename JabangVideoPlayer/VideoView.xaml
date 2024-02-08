@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:JabangVideoPlayer"
         mc:Ignorable="d"
         Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
-        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown">
+        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown" GotFocus="Border_GotFocus">
     <Border Background="Black" MouseMove="vPlayer_MouseMove">
         <Grid x:Name="grid">
             <Grid.RowDefinitions>

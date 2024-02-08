@@ -23,7 +23,7 @@ namespace JabangVideoPlayer
             Player = player;
             Player.MediaEnded += Player_MediaEnded;
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.01);
+            timer.Interval = TimeSpan.FromSeconds(0.2);
             timer.Tick += Timer_Tick;
             timer.Start();
         }
