@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:JabangVideoPlayer"
         mc:Ignorable="d"
         Title="VideoView" Height="600" Width="800" MinHeight="300" MinWidth="400" Background="Transparent" WindowStyle="None"
-        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown" GotFocus="Border_GotFocus">
-    <Border Background="Black" MouseMove="vPlayer_MouseMove">
+        AllowsTransparency="True" SizeToContent="Width" ResizeMode="CanResizeWithGrip" KeyDown="Window_KeyDown" LostFocus="VPlayer_LostFocus">
+    <Border Background="Black" MouseMove="VPlayer_MouseMove" MouseDown="Border_MouseDown">
         <Grid x:Name="grid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -28,6 +28,7 @@
             <Border Grid.Row="1" Background="#101020" Grid.ColumnSpan="4"/>
 
             <Label Grid.Row="0"
+                   x:Name="dragBorder"
                    Content="JVP"
                    FontSize="20"
                    FontWeight="SemiBold"
@@ -94,7 +95,7 @@
             <MediaElement x:Name="vPlayer" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="2"
                           LoadedBehavior="Manual"
                           UnloadedBehavior="Manual"
-                          MediaEnded="VPlayer_MediaEnded" Stretch="Uniform"/>
+                          MediaEnded="VPlayer_MediaEnded" Stretch="Uniform" KeyDown="Window_KeyDown"/>
 
             <Grid x:Name="controlBar" Grid.Row="3" Grid.ColumnSpan="3" Visibility="Visible">
                 <Grid.ColumnDefinitions>
@@ -161,6 +162,23 @@
                 Press F11 to Exit
             </TextBlock>
 
+            <TextBlock x:Name="playOrPauseText" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Visible"
+           Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="Bold"
+           VerticalAlignment="Center" FontSize="48" Margin="0,0,0,0" Text="">
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="4"
+                          Color="Black"
+                          Opacity="1"
+                          BlurRadius="4"/>
+                </TextBlock.Effect>
+                <TextBlock.Resources>
+                    <Storyboard x:Key="FadeOutAnimation">
+                        <DoubleAnimation Storyboard.TargetName="playOrPauseText"
+                             Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.0" Duration="0:0:1"/>
+                    </Storyboard>
+                </TextBlock.Resources>
+            </TextBlock>
         </Grid>
     </Border>
 </Window>

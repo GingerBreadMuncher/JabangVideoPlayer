@@ -13,7 +13,7 @@ namespace JabangVideoPlayer
             _mediaElement = mediaElement;
             _videoPlayer = videoPlayer;
         }
-        public string PlayOrPause(string pausedOrNah)
+        public string PlayOrPause()
         {
             if (_videoPlayer.VideosPlaying)
             {

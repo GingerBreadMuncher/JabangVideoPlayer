@@ -9,6 +9,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Media.Animation;
 
 namespace JabangVideoPlayer
 {
@@ -22,8 +23,10 @@ namespace JabangVideoPlayer
         Controller _controller;
         DispatcherTimer _hideControlsTimer;
         DispatcherTimer _fullScreenPopUpTimer;
+        DispatcherTimer _titlePopUpTimer;
         bool _isVideoEnded = false;
         bool _isFullScreen = false;
+        bool _isFolderListEnabled = false;
         bool _isTitlePopUpEnabled = true;
         bool _isFullScreenPopUpEnabled = true;
         Dictionary<string, string> _listFilePaths;
@@ -44,6 +47,10 @@ namespace JabangVideoPlayer
             _fullScreenPopUpTimer.Interval = TimeSpan.FromSeconds(4);
             _fullScreenPopUpTimer.Tick += FullScreenPopUpTimer_Tick;
 
+            _titlePopUpTimer = new DispatcherTimer();
+            _titlePopUpTimer.Interval = TimeSpan.FromSeconds(3);
+            _titlePopUpTimer.Tick += TitlePopUpTimer_Tick;
+
             this.KeyDown += new KeyEventHandler(Window_KeyDown);
             PreLoadVideo();
             _videoPlayer.PositionChanged += UpdateTimeline;
@@ -56,11 +63,6 @@ namespace JabangVideoPlayer
             {
                 DragMove();
             }
-        }
-
-        private void Border_GotFocus(object sender, RoutedEventArgs e)
-        {
-            HideControls();
         }
 
         private void CloseApp_Click(object sender, RoutedEventArgs e)
@@ -104,7 +106,7 @@ namespace JabangVideoPlayer
             if (this.WindowState != WindowState.Maximized) { MaximizeApp(); }
             grid.RowDefinitions[0].Height = new GridLength(0);
             grid.RowDefinitions[1].Height = new GridLength(0);
-            vPlayer.MouseMove += vPlayer_MouseMove;
+            vPlayer.MouseMove += VPlayer_MouseMove;
             _hideControlsTimer.Stop();
             _hideControlsTimer.Start();
             _fullScreenPopUpTimer.Stop();
@@ -132,8 +134,13 @@ namespace JabangVideoPlayer
         {
             if (_isFullScreen)
             {
-                controlBar.Visibility = Visibility.Hidden;
-                _hideControlsTimer.Stop();
+                controlBar.Visibility = Visibility.Collapsed;
+                if (_isFolderListEnabled) 
+                {
+                    grid.ColumnDefinitions[3].Width = new GridLength(0);
+                    folderList.Visibility = Visibility.Collapsed;
+                }
+                if (_hideControlsTimer.IsEnabled) { _hideControlsTimer.Stop(); }
             }
         }
 
@@ -145,13 +152,36 @@ namespace JabangVideoPlayer
                 _hideControlsTimer.Stop();
             }
         }
+        
+        private void TitlePopUpTimer_Tick(object sender, EventArgs e)
+        {
+            if (_isTitlePopUpEnabled)
+            {
+                titlePopUpText.Text = "";
+                _titlePopUpTimer.Stop();
+            }
+        }
 
-        private void vPlayer_MouseMove(object sender, MouseEventArgs e)
+        private void TitlePopUp(string fileName)
+        {
+            if (_isTitlePopUpEnabled)
+            {
+                titlePopUpText.Text = fileName;
+                _titlePopUpTimer.Start();
+            }
+        }
+
+        private void VPlayer_MouseMove(object sender, MouseEventArgs e)
         {
             if (_isFullScreen)
             {
                 controlBar.Visibility = Visibility.Visible;
-                _hideControlsTimer.Start();
+                if (_isFolderListEnabled)
+                {
+                    grid.ColumnDefinitions[3].Width = new GridLength(250);
+                    folderList.Visibility = Visibility.Visible;
+                }
+                if (!_hideControlsTimer.IsEnabled) { _hideControlsTimer.Start(); }
             }
         }
 
@@ -170,9 +200,11 @@ namespace JabangVideoPlayer
             status.Visibility = Visibility.Visible;
             select.Visibility = Visibility.Visible;
             controlBar.Visibility = Visibility.Visible;
+            if (_isFolderListEnabled) folderList.Visibility = Visibility.Visible;
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
+            playOrPauseText.Text = "";
         }
 
         private void UpdateTimeline(double value, double maxValue)
@@ -183,11 +215,25 @@ namespace JabangVideoPlayer
 
         private void Play_Click(object sender, RoutedEventArgs e)
         {
-            play.Content = _controller.PlayOrPause(play.Content.ToString());
+            play.Content = _controller.PlayOrPause();
 
             if (_isVideoEnded)
             {
                 PreLoadVideo();
+            }
+        }
+
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!controlBar.IsMouseOver && !folderList.IsMouseOver && !dragBorder.IsMouseOver && _isVideoEnded == false)
+            {
+                play.Content = _controller.PlayOrPause();
+                playOrPauseText.Text = play.Content.ToString();
+                Storyboard storyboard = playOrPauseText.FindResource("FadeOutAnimation") as Storyboard;
+                if (storyboard != null)
+                {
+                    storyboard.Begin();
+                }
             }
         }
 
@@ -234,6 +280,7 @@ namespace JabangVideoPlayer
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                _isFolderListEnabled = true;
                 folderListBox.Items.Clear();
                 grid.ColumnDefinitions[3].Width = new GridLength(250);
                 folderList.Visibility = Visibility.Visible;
@@ -266,23 +313,22 @@ namespace JabangVideoPlayer
 
         private void CloseList_Click(object sender, RoutedEventArgs e)
         {
+            _isFolderListEnabled = false;
             folderListBox.Items.Clear();
             folderList.Visibility = Visibility.Collapsed;
             grid.ColumnDefinitions[3].Width = new GridLength(0);
         }
 
-        private void TitlePopUp(string fileName)
+        private void VPlayer_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (_isTitlePopUpEnabled)
+            if (_isFullScreen && !controlBar.IsMouseOver && !folderList.IsMouseOver)
             {
-                titlePopUpText.Text = fileName;
-                Task.Delay(3000).ContinueWith(_ =>
+                controlBar.Visibility = Visibility.Collapsed;
+                if (_isFolderListEnabled)
                 {
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        titlePopUpText.Text = "";
-                    });
-                });
+                    grid.ColumnDefinitions[3].Width = new GridLength(0);
+                    folderList.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
