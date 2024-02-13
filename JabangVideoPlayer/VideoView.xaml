@@ -115,7 +115,7 @@
                     HorizontalAlignment="Left" VerticalAlignment="Center" Margin="25,0,0,0" ValueChanged="Volume_ValueChanged"
                     Minimum="0" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
 
-                <Slider x:Name="timeline" Grid.Row="3" Grid.Column="1"
+                <local:Timeline x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
                     Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
 

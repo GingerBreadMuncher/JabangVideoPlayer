@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -21,6 +20,7 @@ namespace JabangVideoPlayer
         Video _video;
         VideoPlayer _videoPlayer;
         Controller _controller;
+        Timeline _timeline;
         DispatcherTimer _hideControlsTimer;
         DispatcherTimer _fullScreenPopUpTimer;
         DispatcherTimer _titlePopUpTimer;
@@ -38,6 +38,8 @@ namespace JabangVideoPlayer
             _video = new Video { FilePath = filePath, FileName = fileName };
             _controller = new Controller(_videoPlayer.Player, _videoPlayer);
             _listFilePaths = new Dictionary<string, string>();
+            _timeline = new Timeline();
+            timeline.Initialize(vPlayer, _videoPlayer);
 
             _hideControlsTimer = new DispatcherTimer();
             _hideControlsTimer.Interval = TimeSpan.FromSeconds(3);
@@ -209,8 +211,16 @@ namespace JabangVideoPlayer
 
         private void UpdateTimeline(double value, double maxValue)
         {
-            timeline.Value = value;
-            timeline.Maximum = maxValue;
+            if (!timeline.IsDragging)
+            {
+                timeline.Value = value;
+                timeline.Maximum = maxValue;
+            }
+            else
+            {
+                play.Content = "⏸";
+                _videoPlayer.VideosPlaying = true;
+            }
         }
 
         private void Play_Click(object sender, RoutedEventArgs e)
@@ -230,10 +240,7 @@ namespace JabangVideoPlayer
                 play.Content = _controller.PlayOrPause();
                 playOrPauseText.Text = play.Content.ToString();
                 Storyboard storyboard = playOrPauseText.FindResource("FadeOutAnimation") as Storyboard;
-                if (storyboard != null)
-                {
-                    storyboard.Begin();
-                }
+                if (storyboard != null) { storyboard.Begin(); }
             }
         }
 
@@ -250,7 +257,7 @@ namespace JabangVideoPlayer
 
         private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            _controller.UpdatePosition(e.NewValue);
+            _timeline.UpdatePosition(e.NewValue);
         }
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -285,7 +292,7 @@ namespace JabangVideoPlayer
                 grid.ColumnDefinitions[3].Width = new GridLength(250);
                 folderList.Visibility = Visibility.Visible;
                 string folderPath = dialog.FileName;
-                string[] extensions = new string[] { ".mp4", ".avi", ".mp3" };
+                string[] extensions = new string[] { ".mp4", ".avi", ".mp3", ".mkv" };
                 IEnumerable<string> files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
                     .Where(file => extensions.Contains(Path.GetExtension(file)));
 

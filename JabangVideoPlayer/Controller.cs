@@ -29,14 +29,6 @@ namespace JabangVideoPlayer
             }
         }
 
-        public void UpdatePosition(double value)
-        {
-            if (_mediaElement != null && _mediaElement.NaturalDuration.HasTimeSpan && _videoPlayer.VideosPlaying)
-            {
-                _mediaElement.Position = TimeSpan.FromSeconds(value);
-            }
-        }
-
         public void Volume_ValueChanged(double value)
         {
             if (_videoPlayer != null && _videoPlayer.Player != null)
