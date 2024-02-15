@@ -137,6 +137,7 @@ namespace JabangVideoPlayer
             if (_isFullScreen)
             {
                 controlBar.Visibility = Visibility.Collapsed;
+                Cursor = Cursors.None;
                 if (_isFolderListEnabled) 
                 {
                     grid.ColumnDefinitions[3].Width = new GridLength(0);
@@ -178,6 +179,7 @@ namespace JabangVideoPlayer
             if (_isFullScreen)
             {
                 controlBar.Visibility = Visibility.Visible;
+                Cursor = Cursors.Arrow;
                 if (_isFolderListEnabled)
                 {
                     grid.ColumnDefinitions[3].Width = new GridLength(250);
@@ -189,24 +191,41 @@ namespace JabangVideoPlayer
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.F11)
+            switch (e.Key)
             {
-                if (_isFullScreen == true) { ExitFullScreen(); }
+                case Key.F11: if (_isFullScreen == true) { ExitFullScreen(); } break;
+
+                case Key.Right: if (vPlayer.NaturalDuration.HasTimeSpan && _videoPlayer.VideosPlaying) 
+                    { 
+                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(5)); status.Text = "⏩";
+                        Storyboard storyboardRight = status.FindResource("FadeOutAnimation") as Storyboard;
+                        if (storyboardRight != null) { storyboardRight.Begin(); };
+                    } 
+                    break;
+
+                case Key.Left: if (vPlayer.NaturalDuration.HasTimeSpan && _videoPlayer.VideosPlaying)
+                    {
+                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(-5)); status.Text = "⏪";
+                        Storyboard storyboardLeft = status.FindResource("FadeOutAnimation") as Storyboard;
+                        if (storyboardLeft != null) { storyboardLeft.Begin(); };
+                    }
+                    break;
             }
         }
 
         private void VPlayer_MediaEnded(object sender, RoutedEventArgs e)
         {
+            SizeToContent = SizeToContent.Manual;
             _videoPlayer.ResetPlayer();
             _videoPlayer.Player.Visibility = Visibility.Collapsed;
-            status.Visibility = Visibility.Visible;
+            mediaEndedText.Visibility = Visibility.Visible;
             select.Visibility = Visibility.Visible;
             controlBar.Visibility = Visibility.Visible;
             if (_isFolderListEnabled) folderList.Visibility = Visibility.Visible;
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
-            playOrPauseText.Text = "";
+            mediaEndedText.Text = "";
         }
 
         private void UpdateTimeline(double value, double maxValue)
@@ -238,8 +257,8 @@ namespace JabangVideoPlayer
             if (!controlBar.IsMouseOver && !folderList.IsMouseOver && !dragBorder.IsMouseOver && _isVideoEnded == false)
             {
                 play.Content = _controller.PlayOrPause();
-                playOrPauseText.Text = play.Content.ToString();
-                Storyboard storyboard = playOrPauseText.FindResource("FadeOutAnimation") as Storyboard;
+                status.Text = play.Content.ToString();
+                Storyboard storyboard = status.FindResource("FadeOutAnimation") as Storyboard;
                 if (storyboard != null) { storyboard.Begin(); }
             }
         }
@@ -249,7 +268,7 @@ namespace JabangVideoPlayer
             _isVideoEnded = false;
             play.Content = "⏸";
             _videoPlayer.Player.Visibility = Visibility.Visible;
-            status.Visibility = Visibility.Collapsed;
+            mediaEndedText.Visibility = Visibility.Collapsed;
             select.Visibility = Visibility.Collapsed;
             _videoPlayer.LoadVideo(_video);
             _videoPlayer.VideosPlaying = true;
@@ -258,6 +277,7 @@ namespace JabangVideoPlayer
         private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             _timeline.UpdatePosition(e.NewValue);
+            vPlayer.Position = TimeSpan.FromSeconds(timeline.Value);
         }
 
         private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -273,6 +293,7 @@ namespace JabangVideoPlayer
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
+                SizeToContent = SizeToContent.Width;
                 _video.FilePath = openFileDialog.FileName;
                 _video.FileName = openFileDialog.SafeFileName;
                 PreLoadVideo();

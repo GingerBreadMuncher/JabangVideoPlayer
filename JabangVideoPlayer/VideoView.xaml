@@ -84,7 +84,7 @@
                 </MenuItem>
             </Menu>
 
-            <TextBlock x:Name="status" Grid.Row="2" Grid.ColumnSpan="3"
+            <TextBlock x:Name="mediaEndedText" Grid.Row="2" Grid.ColumnSpan="3"
                 Text="No video is playing right now" Foreground="White"
                 FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"
                 Margin="0,0,0,150" Visibility="Visible"/>
@@ -95,7 +95,7 @@
             <MediaElement x:Name="vPlayer" Grid.Row="2" Grid.ColumnSpan="3" Grid.RowSpan="2"
                           LoadedBehavior="Manual"
                           UnloadedBehavior="Manual"
-                          MediaEnded="VPlayer_MediaEnded" Stretch="Uniform" KeyDown="Window_KeyDown"/>
+                          MediaEnded="VPlayer_MediaEnded" Stretch="Uniform" KeyDown="Window_KeyDown" ScrubbingEnabled="True"/>
 
             <Grid x:Name="controlBar" Grid.Row="3" Grid.ColumnSpan="3" Visibility="Visible">
                 <Grid.ColumnDefinitions>
@@ -113,11 +113,11 @@
 
                 <Slider x:Name="volume" Grid.Row="3" Grid.Column="2" Width="100"
                     HorizontalAlignment="Left" VerticalAlignment="Center" Margin="25,0,0,0" ValueChanged="Volume_ValueChanged"
-                    Minimum="0" Maximum="100" Value="50" IsMoveToPointEnabled="True"/>
+                    Minimum="0" Maximum="100" Value="50" IsMoveToPointEnabled="True" Focusable="False"/>
 
                 <local:Timeline x:Name="timeline" Grid.Row="3" Grid.Column="1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0"
-                    Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True"/>
+                    Minimum="0" Maximum="100" ValueChanged="Timeline_ValueChanged" IsMoveToPointEnabled="True" Focusable="False"/>
 
                 <Button x:Name="fullScreen" Grid.Row="3" Grid.Column="2" Width="50" FontSize="35"
                     HorizontalAlignment="Right" Content="⛶" BorderThickness="0"
@@ -162,7 +162,7 @@
                 Press F11 to Exit
             </TextBlock>
 
-            <TextBlock x:Name="playOrPauseText" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Visible"
+            <TextBlock x:Name="status" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Visible"
            Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="Bold"
            VerticalAlignment="Center" FontSize="48" Margin="0,0,0,0" Text="">
                 <TextBlock.Effect>
@@ -173,7 +173,7 @@
                 </TextBlock.Effect>
                 <TextBlock.Resources>
                     <Storyboard x:Key="FadeOutAnimation">
-                        <DoubleAnimation Storyboard.TargetName="playOrPauseText"
+                        <DoubleAnimation Storyboard.TargetName="status"
                              Storyboard.TargetProperty="Opacity"
                              From="1.0" To="0.0" Duration="0:0:1"/>
                     </Storyboard>
