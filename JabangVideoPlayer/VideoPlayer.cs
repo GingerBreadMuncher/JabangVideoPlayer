@@ -10,10 +10,12 @@ namespace JabangVideoPlayer
         public MediaElement Player { get; set; }
         public Video CurrentVideo { get; set; }
 
-        public event Action<double, double> PositionChanged;
+        public event Action<double, double, TimeSpan, TimeSpan> PositionChanged;
 
         public double MaxValue { get; private set; }
         public double Value { get; private set; }
+        public TimeSpan TimeRemaining { get; private set; }
+        public TimeSpan ElapsedTime { get; private set; }
 
         public bool VideosPlaying = true;
 
@@ -31,9 +33,11 @@ namespace JabangVideoPlayer
         {
             if (Player.NaturalDuration.HasTimeSpan)
             {
+                ElapsedTime = Player.Position;
+                TimeRemaining = Player.NaturalDuration.TimeSpan - Player.Position;
                 MaxValue = Player.NaturalDuration.TimeSpan.TotalSeconds;
                 Value = Player.Position.TotalSeconds;
-                PositionChanged?.Invoke(Value, MaxValue);
+                PositionChanged?.Invoke(Value, MaxValue, TimeRemaining, ElapsedTime);
             }
         }
 

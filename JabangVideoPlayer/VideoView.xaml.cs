@@ -197,7 +197,7 @@ namespace JabangVideoPlayer
 
                 case Key.Right: if (vPlayer.NaturalDuration.HasTimeSpan && _videoPlayer.VideosPlaying) 
                     { 
-                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(5)); status.Text = "⏩";
+                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(2.5)); status.Text = "⏩";
                         Storyboard storyboardRight = status.FindResource("FadeOutAnimation") as Storyboard;
                         if (storyboardRight != null) { storyboardRight.Begin(); };
                     } 
@@ -205,7 +205,7 @@ namespace JabangVideoPlayer
 
                 case Key.Left: if (vPlayer.NaturalDuration.HasTimeSpan && _videoPlayer.VideosPlaying)
                     {
-                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(-5)); status.Text = "⏪";
+                        vPlayer.Position = vPlayer.Position.Add(TimeSpan.FromSeconds(-2.5)); status.Text = "⏪";
                         Storyboard storyboardLeft = status.FindResource("FadeOutAnimation") as Storyboard;
                         if (storyboardLeft != null) { storyboardLeft.Begin(); };
                     }
@@ -225,11 +225,13 @@ namespace JabangVideoPlayer
             _isVideoEnded = true;
             _videoPlayer.VideosPlaying = false;
             play.Content = "▶";
-            mediaEndedText.Text = "";
+            status.Text = "";
         }
 
-        private void UpdateTimeline(double value, double maxValue)
+        private void UpdateTimeline(double value, double maxValue, TimeSpan remaining, TimeSpan elapsed)
         {
+            remainingTimeTextBlock.Text = remaining.ToString(@"hh\:mm\:ss");
+            elapsedTimeTextBlock.Text = elapsed.ToString(@"hh\:mm\:ss");
             if (!timeline.IsDragging)
             {
                 timeline.Value = value;

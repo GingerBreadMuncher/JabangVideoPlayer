@@ -124,6 +124,10 @@
                     Background="Black" Foreground="White"
                     Click="FullScreen_Click"/>
 
+                <TextBlock x:Name="elapsedTimeTextBlock" Grid.Column="1" Text="00:00:00" Foreground="Gray" FontSize="12" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                
+                <TextBlock x:Name="remainingTimeTextBlock" Grid.Column="1" Text="00:00:00" Foreground="Gray" FontSize="12" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+
             </Grid>
 
             <Grid x:Name="folderList" Grid.Row="2" Grid.RowSpan="3" Grid.ColumnSpan="4" Visibility="Collapsed" HorizontalAlignment="Right">
